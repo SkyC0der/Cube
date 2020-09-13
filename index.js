@@ -1,55 +1,60 @@
 
 import * as THREE from './build/three.module.js';
-var camera, scene, renderer;
-var mesh;
-init();
-animate();
 
-// USe boxGeometry Function to create shapes
-// Material is what our object is made of
-// Mesh is the combintion of the two, thus the cube is the mesh of the box and material whew!
-function init() {
 
-    camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 1000 );
-    camera.position.z = 400;
+// We need 3 things everytime we use Three.js
+ // Scene + Camera + Renderer
+ const scene = new THREE.Scene()
+ const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 )
+ const renderer = new THREE.WebGLRenderer({ antialias: true})
+ 
+ renderer.setSize( window.innerWidth, window.innerHeight )
+ // sets renderer background color
+ renderer.setClearColor("#222222")
+ document.body.appendChild( renderer.domElement )
+ camera.position.z = 5
+ 
+ // resize canvas on resize window
+ window.addEventListener( 'resize', () => {
+     let width = window.innerWidth
+     let height = window.innerHeight
+     renderer.setSize( width, height )
+     camera.aspect = width / height
+     camera.updateProjectionMatrix()
+ })
+ 
+ // basic cube
+ var geometry = new THREE.BoxGeometry( 1.5, 1.5, 1.5)
+ var texture = new THREE.TextureLoader().load( 'itachi.jpeg' );
 
-    scene = new THREE.Scene();
-
-    var texture = new THREE.TextureLoader().load( 'itachi.jpeg' );
-
-    var geometry = new THREE.BoxBufferGeometry( 150, 150, 150 );
-    var material = new THREE.MeshBasicMaterial( { map: texture });
-
-    mesh = new THREE.Mesh( geometry, material );
-
-    scene.add( mesh);
-
-    renderer = new THREE.WebGLRenderer( { antialias: true } );
-    renderer.setPixelRatio( window.devicePixelRatio );
-    renderer.setSize( window.innerWidth, window.innerHeight );
-    document.body.appendChild( renderer.domElement );
-
-    //
-
-    window.addEventListener( 'resize', onWindowResize, true );
-
-}
-function onWindowResize() {
-
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-
-    renderer.setSize( window.innerWidth, window.innerHeight );
-
-}
-
-function animate() {
-
-    requestAnimationFrame( animate );
-
-    mesh.rotation.x += 0.006;
-    mesh.rotation.y += 0.015;
-
-    renderer.render( scene, camera );
-
-}
+ var material = new THREE.MeshStandardMaterial( { flatShading: true, metalness: 0, roughness: 1, map: texture })
+ var cube = new THREE.Mesh ( geometry, material )
+ scene.add( cube )
+ 
+ // wireframe cube
+ var geometry = new THREE.BoxGeometry( 3, 3, 3)
+ var material = new THREE.MeshBasicMaterial( {
+     color: "#dadada", wireframe: true, transparent: true
+ })
+ var wireframeCube = new THREE.Mesh ( geometry, material )
+ scene.add( wireframeCube )
+ 
+ // ambient light
+ var ambientLight = new THREE.AmbientLight ( 0xffffff, 0.2)
+ scene.add( ambientLight )
+ 
+ // point light
+ var pointLight = new THREE.PointLight( 0xffffff, 1 );
+ pointLight.position.set( 25, 50, 25 );
+ scene.add( pointLight );
+ 
+ 
+ function animate() {
+     requestAnimationFrame( animate )
+     cube.rotation.x += 0.02;
+     cube.rotation.y += 0.02;
+     wireframeCube.rotation.x -= 0.01;
+     wireframeCube.rotation.y -= 0.01;
+     renderer.render( scene, camera )
+ }
+ animate()
